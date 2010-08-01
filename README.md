@@ -1,6 +1,8 @@
 Wilson
 ==============================
 
+![Wilson welcomes you](http://neversaw.us/media/img/wilson.jpg)
+
     "Hidee-ho, neighbor"
 
 Wilson is a framework for Node.js, the product of me spending several nights kind of sleeplessly hacking on the idea.
