@@ -7,7 +7,6 @@ var node = process.argv[0] === 'node',
 var runserver = require('wilson').runserver;
 
 require.paths.push(process.cwd());
-sys.debug(require.paths);
 
 runserver(settings, port);
 
