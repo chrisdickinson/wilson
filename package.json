@@ -10,7 +10,7 @@
     "directories": {"lib": "./lib" },
     "main": "./lib/main",
     "bin":{
-        "wilson-runserver":"./bin/runserver"
+        "wilson":"./bin/wilson"
     },
     "license": [
         "New BSD License"
