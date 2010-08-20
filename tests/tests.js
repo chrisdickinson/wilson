@@ -7,3 +7,4 @@ var includeFile = function(file) {
 
 includeFile('application');
 includeFile('urls');
+includeFile('cookies');
