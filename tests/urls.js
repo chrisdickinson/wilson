@@ -60,4 +60,22 @@ exports.UrlsAppWillWrapAppUrls = platoon.unit({},
     }
 );
 
+exports.testView = function() {
+    return this.triggeredValue;
+};
 
+exports.UrlsWrap = platoon.unit({},
+    function(assert) {
+        "Test that wrap returns a function that will call the original function in the context of an appInstance";
+        var conf = wilson.conf,
+            randomAppName = 'app-'+Math.random(),
+            expected = Math.random();
+        conf.setApplicationInstance(randomAppName, {
+            'triggeredValue':expected
+        });
+        var result = urls.wrap('tests/urls.testView', randomAppName);
+        assert.isInstance(result, Function);
+        result = result();
+        assert.equal(expected, result);
+    }
+);
