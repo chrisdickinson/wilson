@@ -167,7 +167,7 @@ exports.TestCookieManagerMethods = platoon.unit({},
             compiled = manager.compile(),
             expected = names.map(function(item) {
                 return manager.morsels[item].getAsHeader();
-            }).join('; ');
+            }).join('; ') + ';';
         assert.equal(expected, compiled);
     }
 );
