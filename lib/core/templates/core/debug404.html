@@ -1,4 +1,3 @@
-TECHNICAL_404_TEMPLATE = """
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
 <head>
@@ -29,38 +28,32 @@ TECHNICAL_404_TEMPLATE = """
     <table class="meta">
       <tr>
         <th>Request Method:</th>
-        <td>{{ request.META.REQUEST_METHOD }}</td>
+        <td>{{ request.method }}</td>
       </tr>
       <tr>
         <th>Request URL:</th>
-      <td>{{ request.build_absolute_uri|escape }}</td>
+      <td>{{ request.pathname }}</td>
       </tr>
     </table>
   </div>
   <div id="info">
     {% if urlpatterns %}
       <p>
-      Using the URLconf defined in <code>{{ settings.ROOT_URLCONF }}</code>,
-      Django tried these URL patterns, in this order:
+      Using the URLconf defined in <code>{{ settings.root_urlconf }}</code>,
+      Wilson tried these URL patterns, in this order:
       </p>
       <ol>
         {% for pattern in urlpatterns %}
           <li>{{ pattern }}</li>
         {% endfor %}
       </ol>
-      <p>The current URL, <code>{{ request_path|escape }}</code>, didn't match any of these.</p>
+      <p>The current URL, <code>{{ request.pathname }}</code>, didn't match any of these.</p>
     {% else %}
       <p>{{ reason }}</p>
     {% endif %}
   </div>
 
   <div id="explanation">
-    <p>
-      You're seeing this error because you have <code>DEBUG = True</code> in
-      your Django settings file. Change that to <code>False</code>, and Django
-      will display a standard 404 page.
-    </p>
   </div>
 </body>
 </html>
-"""
