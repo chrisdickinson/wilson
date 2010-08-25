@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST" action="{% url auth:login %}">
+    <input type="text" name="username" />
+    <input type="password" name="password" />
+    <input type="submit" value="Submit" />
+</form>
+{% endblock %}
