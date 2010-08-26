@@ -1,0 +1,20 @@
+.. _contents:
+
+=============================
+Wilson documentation contents
+=============================
+
+.. toctree::
+    :maxdepth: 2
+
+    intro/index
+    topics/index
+    howto/index
+
+Indices, glossary and tables
+============================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`glossary`
+
