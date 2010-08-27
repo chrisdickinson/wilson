@@ -32,11 +32,6 @@ These files are:
     * :file:`settings.js`: Base settings for your project.
     * :file:`manage`: A shortcut to the ``wilson`` command that automatically uses the local ``settings.js``.
 
-.. admonition:: Using ``manage``
-
-    To use ``manage`` (an analogue of Django's ``manage.py``), you will first
-    have to ``chmod +x manage``.
-
 Running your project
 --------------------
 
