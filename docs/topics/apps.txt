@@ -1,0 +1,125 @@
+
+.. _topics-apps:
+
+====================================
+Pluggable Applications
+====================================
+
+Applications are a powerful abstraction -- ideally, when writing a site
+using the Wilson framework, you will build it out of several apps that 
+provide discrete functionality. Apps are patterned after Django's apps --
+that is, they provide models, views, routes, middleware, and templates.
+
+Where they diverge, however, is that applications by themselves are
+meaningless until your site-wide settings registers them with a site-specific
+name. You cannot use their models, you cannot meaningfully use their
+views, etc, until they are registered. You can install an app as many
+times at as many routes as you like, and you can reopen an app to override
+settings within it. This is very powerful -- and like many powerful things,
+it can also be fairly confusing to newcomers. 
+
+App Declaration
+---------------
+
+When you write an app, the most important piece is the *App Declaration*,
+which should be located in ``yourapp/app.js``. It looks like this::
+
+    var wilson = require('wilson'),
+        application = wilson.application,
+        app = application.app,
+        fs = require('fs'),
+        path = require('path'),
+        primary = application.primary;
+
+    exports.app = app({
+        'provides':'blog',
+        'models':require('./models'),
+        'external_apps':{
+            'auth':primary('auth')
+        },
+        'urls':require('./urls').patterns,
+        'template_directories':[
+            path.join(path.dirname(fs.realpathSync(__filename)), 'templates')
+        ],
+        'settings':{
+            'is_this_blog_cool':true
+        },
+        'middleware':require('./middleware')
+    });
+
+* The first thing to note is that you'll have to import ``wilson``, ``application``, and
+  some helper functions.
+
+* ``provides`` is a one word string that explains what this application provides to other apps. *Required*.
+
+* ``models`` is a dictionary of ``name`` -> ``models.model`` instance. Plainly ``require`` your ``models.js`` file will work so long as everything exported from that file is an instance of ``models.model``. *Required, but may be empty: ``{}``*.
+
+* ``external_apps`` is a dictionary of ``internal_name`` -> ``location function``. Your app may rely on other applications -- but since Wilson is set up such that the ultimate authority on application instance names is in the top-level ``settings.js`` file, individual apps must declare a way to find a dependency. In this case, we are looking for the ``primary`` instance of an app that ``provides:'auth'``, whatever it may be called globally. *Required, but may be empty -- ``{}``*. 
+
+* ``urls`` is an instance of ``escaperoute.routes``. *Not Required*.
+
+* ``template_directories`` exports a list of directories that provide templates. If you have ``use_app_template_directories`` set in your top-level ``settings.js`` file, these paths will automatically be searched when looking for templates. *Not Required*. 
+
+* ``settings`` is an object literal of settings. These can be overridden per application instance in ``settings.js`` *Not Required*.
+
+* ``middleware`` is an object literal of ``name`` -> ``middleware object``. This declaration **does not** install the middleware, just notifies Wilson that instances of this app have installable middleware. *Not Required*. 
+
+As you can see, the ``exports.app = app({...})`` declaration in ``app.js`` defines how your application appears to the outside world.
+
+Working within an application instance
+--------------------------------------
+
+In your ``app/views.js``, your views may look something like this::
+ 
+    exports.user_list = function(request) {
+        var User = this.externals.auth.models.User;
+
+        User.objects.all(function(objects, err) {
+            if(err || objects.length < 1) {
+                request.respond(new Http404());
+            } else {
+                renderToResponse(request)('blog/user_list.html', {
+                    'user_list':objects
+                });
+            }
+        });
+    };
+     
+This view is executed as a method of your application instance. When working
+within an application instance, the externals you defined in your app delcaration
+are available as full-blown application instances under ``this.externals.<internal_name>``,
+and their models are located at ``this.externals.<internal_name>.models.<ModelName>``.
+
+These models are usable instances of ``pieshop.resource`` -- they can be used to query
+the database at this point. This decouples separate applications from one another, and
+makes top-level injection or swapping of two apps that provide the same functionality
+in different ways easy.
+
+Attributes available on an application instance:
+
+* ``settings``: if your app defined settings, a copy of them will be available here -- possibly overridden by top level settings.
+
+* ``app``: The original app declaration for this application instance. Anything defined in your app declaration can be accessed here.
+
+* ``models``: ``pieshop.resource`` versions of the models defined in your app declaration. These are ready to use with the database.
+
+* ``name``: The name of this application instance, defined by top-level ``settings.js``.
+
+* ``externals``: All external dependencies defined in your app declaration will be resolved into real, usable application instances from the top-level ``settings.js``.
+
+Other ways of accessing application instances
+---------------------------------------------
+
+These are generally not advisable for discrete applications, but if you need access
+to an app instance whose name is known, you can do the following::
+
+    var conf = require('wilson').conf,
+        appInstance = conf.getApplicationInstance('known_app_instance_name');
+
+Or::
+
+    appInstances = conf.getApplicationInstances();
+
+Which return a dict of ``appInstanceName`` -> ``appInstance``.
+
+

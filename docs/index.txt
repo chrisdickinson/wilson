@@ -19,15 +19,9 @@ First steps
         :ref:`Part 3 <intro-tutorial03>` |
         :ref:`Part 4 <intro-tutorial04>`
 
-The Application layer 
-=====================
+Topics
+======
 
-The View layer
-==============
-
-The Model layer
-===============
-
-The Template layer
-==================
+    * :ref:`Applications and Application Instances <topics-apps>`
+    * :ref:`Http - the Request/Response Cylce <topics-http>`
 

@@ -1,0 +1,134 @@
+
+.. _topics-http:
+
+=====================================
+The HTTP Request/Response Cycle
+=====================================
+
+Wilson's HTTP Request/Response style borrows the concept of middleware
+from Django. When a request starts, the original ``HttpRequest`` and ``HttpResponse``
+objects from node are wrapped in a ``HttpRequest`` that is the main point
+of control for the request/response cycle within Wilson.
+
+The request is instantiated with your installed middleware objects, which will
+run their ``processRequest`` methods top-to-bottom until one of the following
+three things happens:
+
+    * A response is given via ``request.respond(responseType)``
+    * An error is thrown or provided to the request, like so ``request.attemptContinue(error_class)``
+    * An error is triggered when no response is given to the request
+
+When a response is given, Wilson will then iterate backwards over your middleware,
+calling the ``processRequest`` method of each, which continues until:
+
+    * Another response is provided with ``request.respond(responseType)``
+    * An error is thrown or provided to the request, like so ``request.attemptContinue(error_class)``
+    * There is no more middleware to iterate over.
+
+If a request successfully falls through all of the response middleware, ``request.end(request.response)``
+is invoked. The original response goes out, and that's the end of the cycle. This is the best case situation.
+
+If another response is provided, ``request.end(newResponse)`` is invoked, and no more middleware is run.
+
+If an error is thrown in either the ``processRequest`` or ``processResponse`` stages of the cycle,
+Wilson will then iterate backwards over the ``processException`` middleware. Here are the possible
+outcomes:
+
+    * A response is provided, shortcircuiting the iteration
+    * Another exception is thrown, resulting in a bare-bones 500 response and shortcircuiting the iteration
+    * The exception is not caught or processed, and a bare-bones 500 response is emitted
+
+=======================================
+The HttpRequest Object
+=======================================
+
+GET, POST, PUT, ...etc
+----------------------
+
+By default, only GET parameters are available via the request object. To enable
+urlencoded POST and PUT, add::
+
+    'core:ProcessUrlEncodedMiddleware',
+
+To ``wilson.values.middleware`` in your ``settings.js`` file. You can test the request
+method with ``request.method``, which will return the uppercase value of the request
+method. PUT params will be available in ``request.PUT['key']``, and POST params will be
+available via ``request.POST['key']``.
+
+Node request and response objects
+---------------------------------
+
+The original request and response objects are available as ``request.nodeRequest`` and
+``request.nodeResponse``, respectively. **It's advised that you do not manually end the request
+via these objects**.
+
+Middleware
+----------
+
+The current stack of middleware is available via::
+
+    request.request_middleware
+    request.response_middleware
+    request.exception_middleware
+
+As the request progresses down the middleware, middleware from the current request state will be
+``shift``'ed off of the request object.
+
+COOKIES
+-------
+
+Cookies are available via the ``request.COOKIES`` object. You can get/set/remove cookies::
+
+    request.COOKIES.set('key', value, {optional_kwargs})
+    request.COOKIES.get('key')
+    request.COOKIES.remove('key')
+
+Cookie values are JSON encoded. 
+
+Errors
+------
+
+Errors are available on the request object as a list -- ``request.errors``, organized by most recent
+error first.
+
+=======================================
+Using the request object to respond
+=======================================
+
+The request method has three primary methods for manipulating the state of the request::
+
+    request.respond(new HttpResponse())
+    request.end(new HttpResponse())
+    request.attemptContinue(<optional error>)
+
+``respond`` will trigger the response middleware if you are within the ``processRequest`` stage of the request,
+or immediately exit the request with a response if you are in any other stage.
+
+``end`` will end the request with the provided response type without triggering any further middleware.
+
+``attemptContinue`` will continue the request along the current stage of the request. If an error is provided,
+it will trigger the ``processException`` stage of the request. This method is most often used in middleware
+functions.
+
+**No view or middleware should assume that returning a value will trigger the next step in the request cycle**.
+The only way to respond or continue is via these three functions. 
+
+=======================================
+Middleware
+=======================================
+
+As with most things in Wilson, Middleware is executed in the context of the application
+instance that provides it -- for instance::
+
+    'apps':{
+        'myblog':'blog'
+    },
+    'middleware':[
+        'myblog:BlogMiddleware',
+    ]
+
+If the ``blog`` application provides middleware by the name of ``BlogMiddleware`` that provides
+``processRequest``, ``processResponse``, or ``processException``, those functions will be executed
+as a method of the ``myblog`` instance of ``blog``; ``this`` inside those functions refers to
+``myblog``.
+
