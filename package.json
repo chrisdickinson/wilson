@@ -1,6 +1,6 @@
 {
     "name": "wilson",
-    "version":"0.0.3",
+    "version":"0.0.4",
     "description": "a framework for people behind fences",
     "keywords": [ 
         "framework",
@@ -8,7 +8,7 @@
     ],
     "author":"Chris Dickinson",
     "directories": {"lib": "./lib" },
-    "main": "./lib/main",
+    "main": "./lib/index",
     "bin":{
         "wilson":"./bin/wilson"
     },
