@@ -1,17 +1,25 @@
 var platoon = require('platoon'),
-    wilson = require('wilson'),
-    urls = wilson.urls,
+    urls = require('wilson/urls'),
+    application = require('wilson/application'),
     escaperoute = require('escaperoute'),
+    conf = require('wilson/conf'),
     url = escaperoute.url;
 
 exports.TestBadUrlConf = platoon.unit({},
     function(assert) {
         "Throws an error when trying to use a bad root URLConf";
-        wilson.settings.set_value('root_urlconf', 'dne.dne.dne');
+        conf.setSettings({
+            'ROOT_URLCONF':'dne.dne.dne'
+        });
+
+
         assert.throws(Error, function() {
             urls.getRoot();
         });
-        wilson.settings.set_value('root_urlconf', undefined);
+
+        conf.setSettings({
+            'ROOT_URLCONF':undefined
+        });
     },
     function(assert) {
         "Throws an error when root_urlconf is undefined";
@@ -24,7 +32,10 @@ exports.TestBadUrlConf = platoon.unit({},
 exports.TestReverseTriggersRootUrlConfReverse = platoon.unit({},
     function(assert) {
         "Reverse delegates to root_urlconf.reverse";
-        wilson.settings.set_value('root_urlconf', 'tests/fakeurls.patterns');
+        conf.setSettings({
+            'ROOT_URLCONF':'tests/fakeurls.patterns'
+        });
+
         var randomName = Math.random(),
             randomValues = [Math.random(), Math.random()],
             reversed = urls.reverse(randomName, randomValues);
@@ -33,7 +44,9 @@ exports.TestReverseTriggersRootUrlConfReverse = platoon.unit({},
         assert.equal(randomName, values[0]);
         assert.equal(randomValues[0], values[1][0]);
         assert.equal(randomValues[1], values[1][1]);
-        wilson.settings.set_value('root_urlconf', undefined);
+        conf.setSettings({
+            'ROOT_URLCONF':undefined
+        });
     }
 );
 
@@ -43,10 +56,10 @@ exports.UrlsAppWillWrapAppUrls = platoon.unit({},
         var randomName = 'random'+Math.random(),
             routes = escaperoute.routes('',
                 url('^awesome/$', function() {
-                    assert.isInstance(this, wilson.application.ApplicationInstance);
+                    assert.isInstance(this, application.ApplicationInstance);
                 }, randomName)
             ),
-            app = wilson.application.app({
+            app = application.app({
                 'urls':routes,
             }),
             appInstance = app.instantiate(randomName, app),
@@ -67,10 +80,9 @@ exports.testView = function() {
 exports.UrlsWrap = platoon.unit({},
     function(assert) {
         "Test that wrap returns a function that will call the original function in the context of an appInstance";
-        var conf = wilson.conf,
-            randomAppName = 'app-'+Math.random(),
+        var randomAppName = 'app-'+Math.random(),
             expected = Math.random();
-        conf.setApplicationInstance(randomAppName, {
+        application.setApplicationInstance(randomAppName, {
             'triggeredValue':expected
         });
         var result = urls.wrap('tests/urls.testView', randomAppName);

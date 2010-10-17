@@ -1,7 +1,14 @@
+var sys = require('sys');
 var includeFile = function(file) {
-    var obj = require('./'+file);
-    for(var i in obj) if(obj.hasOwnProperty(i)) {
-        exports[file + "/" + i] = obj[i];
+    try {
+        var obj = require('./'+file);
+        for(var i in obj) if(obj.hasOwnProperty(i)) {
+            exports[file + "/" + i] = obj[i];
+        }
+    } catch(err) {
+        sys.puts("Error in "+file);
+        sys.puts(err);
+        sys.puts(err.stack);
     }
 };
 

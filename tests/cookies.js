@@ -1,6 +1,5 @@
 var platoon = require('platoon'),
-    wilson = require('wilson'),
-    cookies = wilson.cookies,
+    cookies = require('wilson/cookies'),
     Morsel = cookies.Morsel,
     CookieManager = cookies.CookieManager;
 

@@ -1,3 +1,8 @@
 #!/usr/bin/env node
-process.argv.push('settings');
-require('wilson').commands.runcommand();
+var conf = require('wilson/conf'),
+    commands = require('wilson/commands'),
+    path = require('path');
+
+require.paths.push(process.cwd());
+conf.setSettingsFile(path.join(__dirname, 'settings.js'));
+commands.runcommand();

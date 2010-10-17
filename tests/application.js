@@ -1,6 +1,6 @@
 var platoon = require('platoon'),
-    wilson = require('wilson'),
-    application = wilson.application;
+    application= require('wilson/application'),
+    models = require('wilson/models');
 
 exports.TestSelectionFunctions = platoon.unit({},
     function(assert) {
@@ -142,7 +142,7 @@ exports.TestAppCreation = platoon.unit({},
             externalApps
             ourAppOptions = {
                 'external_apps':externalApps,
-                'models':{'FakeModel':wilson.models.model({'someDep':wilson.models.ForeignKey(wilson.models.dep(randomName, randomName))})}
+                'models':{'FakeModel':models.model({'someDep':models.ForeignKey(models.dep(randomName, randomName))})}
             };
             app = application.app(ourAppOptions),
             appInstance = app.instantiate(randomName+Math.random());
@@ -164,7 +164,7 @@ exports.TestAppCreation = platoon.unit({},
         var randomTag = 'random'+Math.random(),
             randomName = 'randomName'+Math.random(),
             ourAppOptions = {
-                'models':{'FakeModel':wilson.models.model({'field':wilson.models.CharField({'max_length':255})})}
+                'models':{'FakeModel':models.model({'field':models.CharField({'max_length':255})})}
             };
             app = application.app(ourAppOptions),
             appInstance = app.instantiate(randomName+Math.random());
@@ -179,7 +179,7 @@ exports.TestAppCreation = platoon.unit({},
         var randomTag = 'random'+Math.random(),
             randomName = 'randomName'+Math.random(),
             ourAppOptions = {
-                'models':{'FakeModel':wilson.models.model({'field':wilson.models.CharField({'max_length':255})})}
+                'models':{'FakeModel':models.model({'field':models.CharField({'max_length':255})})}
             };
             app = application.app(ourAppOptions),
             appInstance = app.instantiate(randomName+Math.random()),
