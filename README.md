@@ -17,3 +17,8 @@ urls.js files that contain routes, apps, models that look (in as much as possibl
 
 This is a WIP. 
 
+For an example app and project, [take a look here](http://github.com/chrisdickinson/wilson-example/).
+
+For docs, first of all lower your expectations (and remember that this is a rapidly evolving project), and then look
+over at [readthedocs.org](http://readthedocs.org/projects/chrisdickinson/wilson/docs/).
+
