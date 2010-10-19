@@ -22,12 +22,14 @@ will create a ``mysite`` directory in your current directory.
 It should contain::
 
     mysite/
+        index.js
         urls.js
         settings.js
         manage
 
 These files are:
 
+    * :file:`index.js`: Declares this directory as a module (similar to ``__init__.py`` in Python).
     * :file:`urls.js`: A stub for the base routes for your project.
     * :file:`settings.js`: Base settings for your project.
     * :file:`manage`: A shortcut to the ``wilson`` command that automatically uses the local ``settings.js``.
@@ -36,22 +38,22 @@ Running your project
 --------------------
 
 Now that you've created a base project, it might be worthwhile to check that it worked.
-Run ``./manage core:runserver 8000`` in the ``mysite`` directory to run your project as
+Run ``mysite/manage core:runserver 8000`` to run your project as
 a Node.js server.
 
 When you open the ``http://localhost:8000`` in your browser, you should see a familiar
-welcome page.
+welcome page (NOT IMPLEMENTED YET).
 
 Create an app
 -------------
 
-``cd`` into the ``mysite`` directory and run ``./manage core:startapp blog``. This should
+Run ``mysite/manage core:startapp blog``. This should
 create a directory called ``blog`` containing:: 
 
     blog/
         views.js
         urls.js
-        app.js
+        index.js
         models.js
 
 These files are:
@@ -59,10 +61,10 @@ These files are:
     * :file:`views.js`: A file containing your view functions.
     * :file:`urls.js`: A file defining url patterns for your app.
     * :file:`models.js`: A file containing model definitions.
-    * :file:`app.js`: The main file of the application -- this defines the linkage between your app and external applications, as well describing default settings for your app.
+    * :file:`index.js`: The main file of the application -- this defines the linkage between your app and external applications, as well describing default settings for your app.
 
 Now hold on a minute before we get too far into this -- Wilson clearly borrows the idea of
-apps from Django. Why would we need an ``app.js`` file? In Django, your models are autodiscovered
+apps from Django. Why would we need an ``index.js`` file? In Django, your models are autodiscovered
 once you add that app into the list of ``INSTALLED_APPS``, and you can easily hook up urls by
 using ``include`` and pointing them at a urls file that exists on your ``PYTHONPATH``. Isn't it
 a little boilerplate-y to have to manually describe your app to the outside world?
@@ -82,7 +84,7 @@ This means that apps must provide your project with the following:
     * ``middleware``: An object literal mapping ``middleware_class_name`` to ``middleware_object``.
 
 Wilson requires application authors to provide this information because, until an app is instantiated -- that is,
-included in the object literal ``installed_apps``, it has no meaning. Models cannot be imported from a base app,
+included in the object literal ``INSTALLED_APPS``, it has no meaning. Models cannot be imported from a base app,
 since Wilson does not know how you intend to reference it.
 
 Your view functions will usually be called as a method on the current application instance. That means that
@@ -104,23 +106,19 @@ Getting back to it, let's install your application into your project.
 
 In settings.js, add::
 
-    'myblog':app('./blog'),
+    'myblog':app('blog'),
 
 to::
 
-        'wilson':{
-            'values':{
-                'apps':{
-                    'core':primary('wilson.core'),
-                    'sessions':primary('wilson.contrib.sessions'),
-                    'auth':primary('wilson.contrib.auth'),
-                    'myblog':app('./blog'),                   // our newly installed blog!
-                },
-            }
-        },
+    INSTALLED_APPS = {
+        'core':apps.usePrimary('wilson/core'),
+        'sessions':apps.usePrimary('wilson/contrib/sessions'),
+        'auth':apps.usePrimary('wilson/contrib/auth'),
+        'myblog':apps.use('blog'),       // <--- our newly install blog!
+    };
 
-We've just added an instance of your blog app to this project's installed apps. The ``app(...)`` portion of this
-plainly includes the blog app as a normal app with no special attributes. If you use ``primary(...)`` this app
+We've just added an instance of your blog app to this project's installed apps. The ``apps.use(...)`` portion of this
+plainly includes the blog app as a normal app with no special attributes. If you use ``apps.usePrimary(...)`` this app
 instance will be marked as the primary instance the app. For now, that doesn't matter too much, but it comes in
 handy when defining your application's external dependencies.
 
@@ -141,7 +139,7 @@ And now your app is installed -- though it won't do much good as is, since there
         url = escaperoute.url,
         surl = escaperoute.surl;
 
-    exports.patterns = routes('./views'
+    exports.patterns = routes('blog/views'
         //, url('list/$', 'list_view', 'blog-list-view')
     );
 
@@ -232,16 +230,13 @@ Creating our database
 
 Run ``createdb mysite``, and then add the following to your ``settings.js`` file::
 
-    'pieshop':{
-        'values':{
-            'DB_HOST':'localhost',
-            'DB_NAME':'mysite'
-        },
-        'addons':{
-            'backend':'postpie.backends:PostgresBackend',
-            'transport':'postpie.transports:PostgresTransport',
-        },
-    },
+    var pieshop = require('pieshop');
+
+    pieshop.settings.set_addon('backend', 'postpie.backends:PostgresBackend');
+    pieshop.settings.set_addon('transport', 'postpie.transports:PostgresTransport');
+
+    pieshop.settings.set_value('DB_HOST', 'localhost');
+    pieshop.settings.set_value('DB_NAME', 'mysite');
 
 We're stating that we're using the local database named ``mysite``, and that we want to use the ``PostgresBackend`` as our backend and ``PostgresTransport`` as our transport. Now we can run::
 
