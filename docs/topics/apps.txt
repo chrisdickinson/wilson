@@ -22,29 +22,27 @@ App Declaration
 ---------------
 
 When you write an app, the most important piece is the *App Declaration*,
-which should be located in ``yourapp/app.js``. It looks like this::
+which should be located in ``yourapp/index.js``. It looks like this::
 
-    var wilson = require('wilson'),
-        application = wilson.application,
+    var application = require('wilson/application'),
         app = application.app,
-        fs = require('fs'),
         path = require('path'),
         primary = application.primary;
 
     exports.app = app({
         'provides':'blog',
-        'models':require('./models'),
+        'models':require('yourapp/models'),
         'external_apps':{
             'auth':primary('auth')
         },
-        'urls':require('./urls').patterns,
+        'urls':require('yourapp/urls').patterns,
         'template_directories':[
-            path.join(path.dirname(fs.realpathSync(__filename)), 'templates')
+            path.join(__dirname, 'templates')
         ],
         'settings':{
             'is_this_blog_cool':true
         },
-        'middleware':require('./middleware')
+        'middleware':require('yourapp/middleware')
     });
 
 * The first thing to note is that you'll have to import ``wilson``, ``application``, and
@@ -64,7 +62,7 @@ which should be located in ``yourapp/app.js``. It looks like this::
 
 * ``middleware`` is an object literal of ``name`` -> ``middleware object``. This declaration **does not** install the middleware, just notifies Wilson that instances of this app have installable middleware. *Not Required*. 
 
-As you can see, the ``exports.app = app({...})`` declaration in ``app.js`` defines how your application appears to the outside world.
+As you can see, the ``exports.app = app({...})`` declaration in ``index.js`` defines how your application appears to the outside world.
 
 Working within an application instance
 --------------------------------------
@@ -113,12 +111,12 @@ Other ways of accessing application instances
 These are generally not advisable for discrete applications, but if you need access
 to an app instance whose name is known, you can do the following::
 
-    var conf = require('wilson').conf,
-        appInstance = conf.getApplicationInstance('known_app_instance_name');
+    var application = require('wilson/application'),
+        appInstance = application.getApplicationInstance('known_app_instance_name');
 
 Or::
 
-    appInstances = conf.getApplicationInstances();
+    appInstances = application.getApplicationInstances();
 
 Which return a dict of ``appInstanceName`` -> ``appInstance``.
 
